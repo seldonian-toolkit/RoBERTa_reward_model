@@ -1,0 +1,11 @@
+**/__pycache__
+**/*.egg-info/
+**/pyproject.toml
+**/outcmaes
+**/.DS_Store
+**/logs
+**/.coverage
+build
+dist
+docs/source/_autosummary
+**/.ipynb_checkpoints
