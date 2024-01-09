@@ -62,7 +62,6 @@ def vector_probs_variance(model, theta, data, **kwargs):
     # Get the probabilities 
     probs_list = [1/(1+np.exp(-1*x)) for x in predictions]
     sample_vars = np.array([stddev(probs)**2 for probs in probs_list])
-    print(f"sample_vars: {sample_vars}")
     return sample_vars
 
 
@@ -84,8 +83,6 @@ if __name__ == '__main__':
     primary_data = df_primary[['text','label']].values.tolist()
     print(f"Have {len(primary_data)} samples in primary dataset")
     np.random.shuffle(primary_data)
-    #N_limit_primary = 1000
-    #primary_data = primary_data[:N_limit_primary]
     primary_meta = CustomMetaData(all_col_names=all_col_names)
     primary_dataset = CustomDataSet(data=primary_data, sensitive_attrs=[], num_datapoints=len(primary_data), meta=primary_meta)
 
@@ -93,9 +90,6 @@ if __name__ == '__main__':
     addl_dataset_filename = './holistic_bias_grouped_texts_90percentile_variance_chopped.pkl'
     addl_data  = load_pickle(addl_dataset_filename)
     #rand_indices = np.random.choice(range(len(addl_data)),replace=False,size=len(addl_data))
-    #addl_data = [addl_data[i] for i in rand_indices]
-    addl_data = addl_data
-    #print(addl_data[0:5])
     print(f"Have {len(addl_data)} sentence groups in addl dataset")
     #print([len(x) for x in chopped_grouped_texts])
     addl_meta = CustomMetaData(
