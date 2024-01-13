@@ -70,8 +70,8 @@ if __name__ == '__main__':
     sub_regime=None
     np.random.seed(42)
     # Load the primary dataset - the dynabench R4 dataset with labels
-    data_savename="../dynabench_dataset_4seldo.csv"
-    metadata_savename="../dynabench_metadata_4seldo.json"
+    data_savename="../data/dynabench_dataset_4seldo.csv"
+    metadata_savename="../data/dynabench_metadata_4seldo.json"
     metadata_dict = load_json(metadata_savename)
     all_col_names = metadata_dict['all_col_names']
 
@@ -89,9 +89,7 @@ if __name__ == '__main__':
     # Use harder variance dataset for addl dataset
     addl_dataset_filename = './holistic_bias_grouped_texts_90percentile_variance_chopped.pkl'
     addl_data  = load_pickle(addl_dataset_filename)
-    #rand_indices = np.random.choice(range(len(addl_data)),replace=False,size=len(addl_data))
     print(f"Have {len(addl_data)} sentence groups in addl dataset")
-    #print([len(x) for x in chopped_grouped_texts])
     addl_meta = CustomMetaData(
         all_col_names=["text_groups"],
         sensitive_col_names=[]
@@ -104,7 +102,7 @@ if __name__ == '__main__':
         meta=addl_meta)
 
     # Use Roberta hate speech text model
-    torch_device = device("cuda") # update to "cuda" if not on Mac M1
+    torch_device = device("mps") # update to "cuda" if not on Mac M1
     model = RobertaHateSpeechModel(torch_device)
     primary_batch_size = 12 # this is how many sentences in the dynabench hatespeech dataset we pass through 
     # in a batch
@@ -133,7 +131,6 @@ if __name__ == '__main__':
     # Make additional datasets dict
     # a batch is a bunch of sentences, so batch size should be small
     addl_batch_size = 5
-    # addl_batch_size = 5
     additional_datasets = {
         pt.constraint_str: {
             "VPROB": {
