@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     n_trials = 10
     data_fracs = np.logspace(-2.5,0,10)
-    n_workers = 1
+    n_workers = 1 # this is for CPUs so leave it at 1.
     results_dir = f'results/roberta_hate_speech_and_holistic_bias_90thpercentile_10trials'
     plot_savename = os.path.join(results_dir,f'fair_reward_model_threeplots.png')
     verbose=True
