@@ -11,7 +11,7 @@ from seldonian.seldonian_algorithm import SeldonianAlgorithm
 
 from pytorch_toxicity import RobertaHateSpeechModel
 
-from torch import device
+from torch 
 
 # Our primary objective
 def cross_entropy(model,theta,data,**kwargs):
@@ -102,7 +102,10 @@ if __name__ == '__main__':
         meta=addl_meta)
 
     # Use Roberta hate speech text model
-    torch_device = device("mps") # update to "cuda" if not on Mac M1
+    if torch.cuda.is_available():
+        torch_device = device("cuda:0")
+    else:
+        torch_device = device("mps")
     model = RobertaHateSpeechModel(torch_device)
     primary_batch_size = 12 # this is how many sentences in the dynabench hatespeech dataset we pass through 
     # in a batch
