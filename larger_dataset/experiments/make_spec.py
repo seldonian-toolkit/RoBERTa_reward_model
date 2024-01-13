@@ -11,7 +11,7 @@ from seldonian.seldonian_algorithm import SeldonianAlgorithm
 
 from pytorch_toxicity import RobertaHateSpeechModel
 
-import torch 
+import torch
 
 # Our primary objective
 def cross_entropy(model,theta,data,**kwargs):
@@ -64,14 +64,14 @@ def vector_probs_variance(model, theta, data, **kwargs):
     sample_vars = np.array([stddev(probs)**2 for probs in probs_list])
     return sample_vars
 
-
 if __name__ == '__main__':
     regime='custom'
+    GPU_index = 0
     sub_regime=None
     np.random.seed(42)
     # Load the primary dataset - the dynabench R4 dataset with labels
-    data_savename="../data/dynabench_dataset_4seldo.csv"
-    metadata_savename="../data/dynabench_metadata_4seldo.json"
+    data_savename="../../data/dynabench_dataset_4seldo.csv"
+    metadata_savename="../../data/dynabench_metadata_4seldo.json"
     metadata_dict = load_json(metadata_savename)
     all_col_names = metadata_dict['all_col_names']
 
@@ -81,15 +81,14 @@ if __name__ == '__main__':
     # Shuffle it
     # Now build Seldonian dataset object using only the columns we'll need to evaluate the primary objective
     primary_data = df_primary[['text','label']].values.tolist()
-    print(f"Have {len(primary_data)} samples in primary dataset")
     np.random.shuffle(primary_data)
+
     primary_meta = CustomMetaData(all_col_names=all_col_names)
     primary_dataset = CustomDataSet(data=primary_data, sensitive_attrs=[], num_datapoints=len(primary_data), meta=primary_meta)
 
     # Use harder variance dataset for addl dataset
-    addl_dataset_filename = './holistic_bias_grouped_texts_90percentile_variance_chopped.pkl'
+    addl_dataset_filename = '../holistic_bias_grouped_texts_90percentile_variance_chopped.pkl'
     addl_data  = load_pickle(addl_dataset_filename)
-    print(f"Have {len(addl_data)} sentence groups in addl dataset")
     addl_meta = CustomMetaData(
         all_col_names=["text_groups"],
         sensitive_col_names=[]
@@ -101,11 +100,12 @@ if __name__ == '__main__':
         num_datapoints=len(addl_data), 
         meta=addl_meta)
 
-    # Use Roberta hate speech text model
     if torch.cuda.is_available():
-        torch_device = torch.device("cuda:0")
+        torch_device = torch.device(f"cuda:{GPU_index}")
     else:
         torch_device = torch.device("mps")
+    
+    # Use Roberta hate speech text model
     model = RobertaHateSpeechModel(torch_device)
     primary_batch_size = 12 # this is how many sentences in the dynabench hatespeech dataset we pass through 
     # in a batch
@@ -160,7 +160,7 @@ if __name__ == '__main__':
         optimization_technique='gradient_descent',
         optimizer='adam',
         optimization_hyperparams={
-            'lambda_init'   : np.array([0.01]),
+            'lambda_init'   : np.array([0.05]),
             'alpha_theta'   : 0.00001,
             'alpha_lamb'    : 0.00005,
             'beta_velocity' : 0.9,
@@ -174,5 +174,5 @@ if __name__ == '__main__':
         },
         batch_size_safety=8
     )
-    SA = SeldonianAlgorithm(spec)
-    passed_safety,solution = SA.run(debug=True,write_cs_logfile=True)
+    savename = f'./roberta_hate_speech_and_holistic_bias_90thpercentile_spec_GPU{GPU_index}.pkl'
+    save_pickle(savename,spec,verbose=True)
